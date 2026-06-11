@@ -5,3 +5,4 @@ faiss_index/
 *.egg-info/
 .venv/
 venv/
+.vscode/
