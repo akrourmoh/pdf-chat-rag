@@ -1,0 +1,5 @@
+# Streamlit settings used when the app runs on a server like Render.
+[server]
+headless = true              # don't try to open a browser on the server
+enableCORS = false           # needed so the app works behind Render's proxy
+enableXsrfProtection = false # avoids upload issues behind the proxy

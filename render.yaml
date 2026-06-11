@@ -1,0 +1,14 @@
+# Render Blueprint - lets Render configure the app automatically from this file.
+services:
+  - type: web
+    name: pdf-chat-app
+    runtime: python
+    plan: free
+    buildCommand: pip install -r requirements.txt
+    # $PORT is provided by Render; binding to 0.0.0.0 makes the app reachable.
+    startCommand: streamlit run app.py --server.port $PORT --server.address 0.0.0.0
+    envVars:
+      - key: GOOGLE_API_KEY
+        sync: false          # you enter this secret in the Render dashboard, not in the file
+      - key: PYTHON_VERSION
+        value: "3.12.4"
