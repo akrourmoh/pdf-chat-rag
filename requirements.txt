@@ -1,6 +1,6 @@
 streamlit
 pymupdf
-langchain
+langchain-text-splitters
 google-generativeai
 faiss-cpu
 numpy
