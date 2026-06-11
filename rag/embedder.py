@@ -10,7 +10,7 @@ genai.configure(api_key=os.getenv("GOOGLE_API_KEY"))
 
 # The Gemini embedding model - free to use with your API key and very lightweight,
 # so it works on Render's free tier (no heavy PyTorch model to load into memory).
-EMBED_MODEL = "models/text-embedding-004"
+EMBED_MODEL = "models/embedding-001"
 
 
 def embed_chunks(chunks):
