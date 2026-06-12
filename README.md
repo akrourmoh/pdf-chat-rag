@@ -52,7 +52,7 @@ run on every question.
 - **Language:** Python
 - **Web framework / UI:** Streamlit
 - **LLM:** Google Gemini (`gemini-2.5-flash`)
-- **Embeddings:** Google Gemini (`embedding-001`)
+- **Embeddings:** Google Gemini (`text-embedding-004`)
 - **Vector search:** FAISS
 - **PDF parsing:** PyMuPDF
 - **Text splitting:** LangChain `RecursiveCharacterTextSplitter`

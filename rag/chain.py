@@ -1,20 +1,18 @@
-import os                          # os - used to read environment variables
-import google.generativeai as genai # Google's library to talk to the Gemini API
-from dotenv import load_dotenv      # load_dotenv reads our .env file to get the API key
+import os                      # os - used to read environment variables
+from google import genai       # Google's current (supported) Gemini SDK
+from dotenv import load_dotenv  # load_dotenv reads our .env file to get the API key
 
-# Load the API key from the .env file
+# Load the API key from the .env file and create a Gemini client.
 load_dotenv()
+client = genai.Client(api_key=os.getenv("GOOGLE_API_KEY"))
 
-# Configure the Gemini API with our key
-genai.configure(api_key=os.getenv("GOOGLE_API_KEY"))
-
-# Load the Gemini 2.5 Flash model
-llm = genai.GenerativeModel("gemini-2.5-flash")
+# The Gemini chat model we use to generate answers.
+LLM_MODEL = "gemini-2.5-flash"
 
 
 def get_answer(question, relevant_chunks):
     # This function takes the user's question and the relevant text chunks
-    # retrieved from the PDF, and asks Gemini to generate an answer
+    # retrieved from the PDF, and asks Gemini to generate an answer.
 
     # Join all the relevant chunks into one block of context text
     context = "\n\n".join(relevant_chunks)
@@ -31,7 +29,10 @@ Question: {question}
 Answer:"""
 
     # Send the prompt to Gemini and get the response
-    response = llm.generate_content(prompt)
+    response = client.models.generate_content(
+        model=LLM_MODEL,
+        contents=prompt,
+    )
 
     # Return the text of the response
     return response.text
