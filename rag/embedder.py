@@ -11,7 +11,7 @@ client = genai.Client(api_key=os.getenv("GOOGLE_API_KEY"))
 
 # The Gemini embedding model - free to use with your API key and very lightweight,
 # so it works on Render's free tier (no heavy PyTorch model to load into memory).
-EMBED_MODEL = "text-embedding-004"
+EMBED_MODEL = "gemini-embedding-001"
 
 
 def embed_chunks(chunks):
@@ -20,20 +20,17 @@ def embed_chunks(chunks):
 
     embeddings = []
 
-    # The API accepts up to 100 texts per request, so we send the chunks
-    # in batches of 100 to avoid hitting that limit on large PDFs.
-    for i in range(0, len(chunks), 100):
-        batch = chunks[i:i + 100]
-
+    # gemini-embedding-001 accepts only one text per request, so we embed the
+    # chunks one at a time and collect the resulting vectors.
+    for chunk in chunks:
         result = client.models.embed_content(
             model=EMBED_MODEL,
-            contents=batch,
+            contents=chunk,
             config=types.EmbedContentConfig(task_type="RETRIEVAL_DOCUMENT"),
         )
 
-        # result.embeddings is a list of embedding objects (one per chunk);
-        # each one's .values holds the actual vector of numbers.
-        embeddings.extend([e.values for e in result.embeddings])
+        # result.embeddings[0].values holds the actual vector of numbers.
+        embeddings.append(result.embeddings[0].values)
 
     # Return all the embeddings (vectors)
     return embeddings
