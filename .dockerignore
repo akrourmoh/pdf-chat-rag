@@ -1,0 +1,13 @@
+# Keep the image small and never bake secrets or local data into it.
+__pycache__/
+*.pyc
+.venv/
+venv/
+.env
+*.db
+qdrant_data/
+.git/
+.gitignore
+.vscode/
+.qodo/
+*.md

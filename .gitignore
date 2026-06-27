@@ -1,8 +1,9 @@
 .env
 __pycache__/
 *.pyc
-faiss_index/
+qdrant_data/
 *.egg-info/
+.pytest_cache/
 .venv/
 venv/
 .vscode/

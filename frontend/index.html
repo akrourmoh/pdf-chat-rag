@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>PDF Chat — Sign in</title>
+  <link rel="stylesheet" href="/static/css/style.css" />
+</head>
+<body class="auth-body">
+  <div class="auth-card">
+    <div class="brand">
+      <div class="brand-logo">📄</div>
+      <h1>PDF Chat</h1>
+      <p class="brand-sub">Chat with your documents</p>
+    </div>
+
+    <div class="tabs" id="tabs">
+      <span class="tab-indicator"></span>
+      <button class="tab active" data-tab="login" type="button">Login</button>
+      <button class="tab" data-tab="register" type="button">Register</button>
+    </div>
+
+    <div class="forms">
+      <form id="loginForm" class="form active">
+        <label>
+          Email
+          <input type="email" id="loginEmail" required placeholder="you@example.com" />
+        </label>
+        <label>
+          Password
+          <input type="password" id="loginPassword" required placeholder="••••••••" />
+        </label>
+        <button type="submit" class="btn-primary">Sign in</button>
+      </form>
+
+      <form id="registerForm" class="form">
+        <label>
+          Email
+          <input type="email" id="registerEmail" required placeholder="you@example.com" />
+        </label>
+        <label>
+          Password
+          <input type="password" id="registerPassword" required placeholder="At least 8 characters" />
+        </label>
+        <button type="submit" class="btn-primary">Create account</button>
+      </form>
+    </div>
+
+    <p id="authMessage" class="message"></p>
+  </div>
+
+  <script src="/static/js/common.js"></script>
+  <script src="/static/js/login.js"></script>
+</body>
+</html>

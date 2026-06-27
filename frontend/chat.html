@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>PDF Chat</title>
+  <link rel="stylesheet" href="/static/css/style.css" />
+</head>
+<body class="app-body">
+  <header class="topbar">
+    <div class="topbar-brand">📄 PDF Chat</div>
+    <div class="topbar-right">
+      <span id="userEmail" class="user-email"></span>
+      <button id="logoutBtn" class="btn-ghost" type="button">Logout</button>
+    </div>
+  </header>
+
+  <div class="layout">
+    <aside class="sidebar">
+      <h2>Your documents</h2>
+      <p class="hint">Upload one or more PDFs, then process them.</p>
+      <input type="file" id="fileInput" accept="application/pdf" multiple />
+      <button id="processBtn" class="btn-primary" type="button">Process PDFs</button>
+      <p id="uploadStatus" class="status"></p>
+    </aside>
+
+    <main class="chat">
+      <div id="messages" class="messages">
+        <div class="empty-state">
+          <p>Upload your PDFs and ask a question to get started.</p>
+        </div>
+      </div>
+      <form id="chatForm" class="chat-input">
+        <input type="text" id="questionInput" placeholder="Ask a question about your PDFs..." autocomplete="off" />
+        <button type="submit" class="btn-primary">Send</button>
+      </form>
+    </main>
+  </div>
+
+  <script src="/static/js/common.js"></script>
+  <script src="/static/js/chat.js"></script>
+</body>
+</html>

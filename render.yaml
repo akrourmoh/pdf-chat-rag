@@ -6,9 +6,13 @@ services:
     plan: free
     buildCommand: pip install -r requirements.txt
     # $PORT is provided by Render; binding to 0.0.0.0 makes the app reachable.
-    startCommand: streamlit run app.py --server.port $PORT --server.address 0.0.0.0
+    startCommand: uvicorn api:app --host 0.0.0.0 --port $PORT
     envVars:
       - key: GOOGLE_API_KEY
-        sync: false          # you enter this secret in the Render dashboard, not in the file
+        sync: false          # secrets are entered in the Render dashboard, not in this file
+      - key: JWT_SECRET
+        sync: false
+      - key: DATABASE_URL
+        sync: false          # set to your PostgreSQL connection string in production
       - key: PYTHON_VERSION
         value: "3.12.4"
