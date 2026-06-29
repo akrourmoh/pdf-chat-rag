@@ -1,5 +1,5 @@
 # ── Backend image for the PDF Chat API ───────────────────────────────────────
-FROM python:3.12-slim
+FROM python:3.13-slim
 
 # Keep Python output unbuffered and skip writing .pyc files (cleaner logs/images).
 ENV PYTHONUNBUFFERED=1 \

@@ -15,4 +15,4 @@ services:
       - key: DATABASE_URL
         sync: false          # set to your PostgreSQL connection string in production
       - key: PYTHON_VERSION
-        value: "3.12.4"
+        value: "3.13.1"
