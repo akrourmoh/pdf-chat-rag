@@ -1,9 +1,11 @@
 .env
 __pycache__/
 *.pyc
+*.db
 qdrant_data/
 *.egg-info/
 .pytest_cache/
 .venv/
 venv/
 .vscode/
+.qodo/
