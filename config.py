@@ -36,6 +36,12 @@ CHUNK_OVERLAP = int(os.getenv("CHUNK_OVERLAP", "200"))  # characters shared betw
 # ── Retrieval ──────────────────────────────────────────────────────────────────
 TOP_K = int(os.getenv("TOP_K", "4"))  # how many chunks to retrieve per question
 
+# ── Performance ──────────────────────────────────────────────────────────────
+# How many embedding requests to send in parallel (network-bound, so threads help).
+EMBED_CONCURRENCY = int(os.getenv("EMBED_CONCURRENCY", "8"))
+# How many recent embeddings to cache in memory (avoids repeat API calls).
+EMBED_CACHE_SIZE = int(os.getenv("EMBED_CACHE_SIZE", "2048"))
+
 # ── Vector database (Qdrant) ────────────────────────────────────────────────────
 # If QDRANT_URL is set, we connect to a hosted Qdrant server (e.g. Qdrant Cloud)
 # - this is what you use in production for real, shared persistence.

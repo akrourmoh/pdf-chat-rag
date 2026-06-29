@@ -10,6 +10,7 @@ own client we create ONE here and reuse it. The helper functions also:
 """
 
 import time
+from functools import lru_cache
 
 from google import genai
 from google.genai import types
@@ -69,9 +70,8 @@ def _with_retries(operation, what):
     raise GeminiError(f"{what} failed: {last_error}")
 
 
-def embed(text, task_type):
-    """Return the embedding vector for a single piece of text."""
-
+def _embed_once(text, task_type):
+    # Perform a single embedding API call (with retries).
     def operation():
         result = client.models.embed_content(
             model=config.EMBED_MODEL,
@@ -81,6 +81,18 @@ def embed(text, task_type):
         return result.embeddings[0].values
 
     return _with_retries(operation, "Embedding request")
+
+
+@lru_cache(maxsize=config.EMBED_CACHE_SIZE)
+def _embed_cached(text, task_type):
+    # Cache identical (text, task_type) lookups so we never pay for the same
+    # embedding twice (e.g. the same question asked again). Thread-safe.
+    return _embed_once(text, task_type)
+
+
+def embed(text, task_type):
+    """Return the embedding vector for a single piece of text (cached)."""
+    return _embed_cached(text, task_type)
 
 
 def generate(prompt):
