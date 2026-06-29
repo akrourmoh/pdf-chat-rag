@@ -15,9 +15,11 @@ The frontend (static HTML/CSS/JS) talks to this API over HTTP/JSON.
 """
 
 import logging
+import time
+import uuid
 from contextlib import asynccontextmanager
 
-from fastapi import FastAPI, UploadFile, File, HTTPException, Depends, status
+from fastapi import FastAPI, UploadFile, File, HTTPException, Depends, status, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.security import OAuth2PasswordRequestForm
 from fastapi.staticfiles import StaticFiles
@@ -26,6 +28,8 @@ from pydantic import BaseModel, EmailStr
 from sqlalchemy.orm import Session
 
 import config
+import observability
+from observability import request_id_var
 from rag import service
 from gemini_client import GeminiError
 from db.database import get_db, init_db
@@ -42,6 +46,10 @@ logger = logging.getLogger("pdfchat")
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
+    # Set up logging + optional error tracking before anything else.
+    observability.configure_logging()
+    observability.init_error_tracking()
+
     # Validate configuration before serving. In production, missing/insecure
     # secrets stop the app from starting (fail fast); in development we only warn.
     errors, warnings = config.validate()
@@ -69,6 +77,32 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+
+@app.middleware("http")
+async def log_requests(request: Request, call_next):
+    # Give each request a short id, time it, and log the outcome.
+    rid = uuid.uuid4().hex[:8]
+    request_id_var.set(rid)
+    start = time.perf_counter()
+    try:
+        response = await call_next(request)
+    except Exception:
+        elapsed = (time.perf_counter() - start) * 1000
+        logger.exception(
+            "%s %s -> error (%.0fms)", request.method, request.url.path, elapsed
+        )
+        raise
+    elapsed = (time.perf_counter() - start) * 1000
+    logger.info(
+        "%s %s -> %s (%.0fms)",
+        request.method,
+        request.url.path,
+        response.status_code,
+        elapsed,
+    )
+    response.headers["X-Request-ID"] = rid
+    return response
 
 
 # ── Request / response models ───────────────────────────────────────────────
@@ -169,9 +203,11 @@ async def process(
 
     try:
         chunk_count = service.process_documents(items, current_user.id)
-    except GeminiError:
+    except GeminiError as exc:
+        logger.warning("Gemini unavailable while processing for user %s: %s", current_user.id, exc)
         raise HTTPException(status_code=503, detail="The AI service is temporarily unavailable.")
     except Exception:
+        logger.exception("Failed to process uploads for user %s", current_user.id)
         raise HTTPException(status_code=500, detail="Failed to process the uploaded files.")
 
     return {"chunks": chunk_count, "files": len(items)}
@@ -188,9 +224,11 @@ def ask(request: AskRequest, current_user: User = Depends(get_current_user)):
 
     try:
         answer, sources = service.answer_question(question, current_user.id)
-    except GeminiError:
+    except GeminiError as exc:
+        logger.warning("Gemini unavailable while answering for user %s: %s", current_user.id, exc)
         raise HTTPException(status_code=503, detail="The AI service is temporarily unavailable.")
     except Exception:
+        logger.exception("Failed to answer question for user %s", current_user.id)
         raise HTTPException(status_code=500, detail="Failed to answer the question.")
 
     return AskResponse(answer=answer, sources=sources)

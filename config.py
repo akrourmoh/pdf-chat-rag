@@ -50,6 +50,10 @@ QDRANT_COLLECTION = os.getenv("QDRANT_COLLECTION", "documents")
 # The frontend calls the FastAPI backend at this address.
 API_URL = os.getenv("API_URL", "http://localhost:8000")
 
+# ── Observability ────────────────────────────────────────────────────────────
+# Optional: set SENTRY_DSN to send errors to Sentry (free tier available).
+SENTRY_DSN = os.getenv("SENTRY_DSN")
+
 # ── Database (users) ────────────────────────────────────────────────────────────
 # SQLAlchemy connection string. The SAME code runs on either database:
 #   - local dev:    sqlite:///users.db            (no server needed)
