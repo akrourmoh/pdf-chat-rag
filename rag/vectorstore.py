@@ -82,6 +82,14 @@ def search_vectorstore(query_embedding, collection_name=None, top_k=None):
     return [hit.payload for hit in response.points]
 
 
+def delete_documents(collection_name=None):
+    # Permanently delete a collection (all of a user's stored documents).
+    collection = collection_name or config.QDRANT_COLLECTION
+    client = get_client()
+    if client.collection_exists(collection):
+        client.delete_collection(collection)
+
+
 def has_documents(collection_name=None):
     # Returns True if the collection exists and contains at least one chunk.
     # Because Qdrant persists data, this stays True across app restarts.

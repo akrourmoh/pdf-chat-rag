@@ -44,3 +44,30 @@ def test_user_documents_are_isolated(client, auth_headers, make_pdf):
     assert client.get("/status", headers=user_b).json()["documents_ready"] is False
     r = client.post("/ask", json={"question": "What is the secret?"}, headers=user_b)
     assert r.status_code == 400
+
+
+def test_delete_my_documents(client, auth_headers, make_pdf):
+    headers = auth_headers("del_docs@test.com")
+    client.post(
+        "/process",
+        files=[("files", ("d.pdf", make_pdf("Some content."), "application/pdf"))],
+        headers=headers,
+    )
+    assert client.get("/status", headers=headers).json()["documents_ready"] is True
+
+    r = client.delete("/me/documents", headers=headers)
+    assert r.status_code == 200
+    # After deletion, the user has no documents.
+    assert client.get("/status", headers=headers).json()["documents_ready"] is False
+
+
+def test_delete_my_account(client, auth_headers):
+    headers = auth_headers("del_acct@test.com")
+    # Account works before deletion.
+    assert client.get("/me", headers=headers).status_code == 200
+
+    r = client.delete("/me", headers=headers)
+    assert r.status_code == 200
+
+    # The token now points to a user that no longer exists -> rejected.
+    assert client.get("/me", headers=headers).status_code == 401

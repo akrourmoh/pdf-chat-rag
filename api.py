@@ -188,6 +188,29 @@ def status_endpoint(current_user: User = Depends(get_current_user)):
     return {"documents_ready": service.documents_ready(current_user.id)}
 
 
+@app.delete("/me/documents")
+def delete_my_documents(current_user: User = Depends(get_current_user)):
+    # GDPR: let a user erase all of their uploaded documents.
+    service.delete_user_documents(current_user.id)
+    logger.info("User %s deleted their documents", current_user.id)
+    return {"status": "documents deleted"}
+
+
+@app.delete("/me")
+def delete_my_account(
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+):
+    # GDPR: let a user delete their account AND all their data.
+    service.delete_user_documents(current_user.id)
+    user = db.query(User).filter(User.id == current_user.id).first()
+    if user:
+        db.delete(user)
+        db.commit()
+    logger.info("User %s deleted their account", current_user.id)
+    return {"status": "account deleted"}
+
+
 @app.post("/process")
 async def process(
     files: list[UploadFile] = File(...),

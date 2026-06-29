@@ -13,6 +13,8 @@ const uploadStatus = document.getElementById("uploadStatus");
 const messages = document.getElementById("messages");
 const chatForm = document.getElementById("chatForm");
 const questionInput = document.getElementById("questionInput");
+const deleteDocsBtn = document.getElementById("deleteDocsBtn");
+const deleteAccountBtn = document.getElementById("deleteAccountBtn");
 
 // ── Load the current user (and validate the token) ───────────────────────────
 async function loadUser() {
@@ -96,6 +98,37 @@ function addMessage(role, text, sources) {
   messages.scrollTop = messages.scrollHeight;
   return wrap;
 }
+
+// ── Privacy / GDPR actions ───────────────────────────────────────────────────
+deleteDocsBtn.addEventListener("click", async () => {
+  if (!confirm("Delete ALL your uploaded documents? This cannot be undone.")) return;
+  try {
+    const res = await fetch("/me/documents", { method: "DELETE", headers: authHeaders() });
+    if (res.ok) {
+      uploadStatus.textContent = "Your documents were deleted.";
+      messages.innerHTML = '<div class="empty-state"><p>Upload your PDFs and ask a question to get started.</p></div>';
+    } else {
+      uploadStatus.textContent = "Could not delete your documents.";
+    }
+  } catch {
+    uploadStatus.textContent = "Could not reach the server.";
+  }
+});
+
+deleteAccountBtn.addEventListener("click", async () => {
+  if (!confirm("Delete your account and ALL your data permanently? This cannot be undone.")) return;
+  try {
+    const res = await fetch("/me", { method: "DELETE", headers: authHeaders() });
+    if (res.ok) {
+      clearToken();
+      window.location.href = "/";
+    } else {
+      uploadStatus.textContent = "Could not delete your account.";
+    }
+  } catch {
+    uploadStatus.textContent = "Could not reach the server.";
+  }
+});
 
 chatForm.addEventListener("submit", async (e) => {
   e.preventDefault();

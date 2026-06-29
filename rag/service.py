@@ -12,7 +12,12 @@ files. This is what makes the app safe for multiple users (multi-tenancy).
 from rag.loader import load_pdfs
 from rag.chunker import split_documents
 from rag.embedder import embed_chunks, embed_query
-from rag.vectorstore import build_vectorstore, search_vectorstore, has_documents
+from rag.vectorstore import (
+    build_vectorstore,
+    search_vectorstore,
+    has_documents,
+    delete_documents,
+)
 from rag.chain import get_answer
 from rag.citations import format_sources
 
@@ -47,3 +52,8 @@ def answer_question(question, user_id):
 def documents_ready(user_id):
     # True if THIS user has already processed and stored documents.
     return has_documents(collection_name=_collection_for(user_id))
+
+
+def delete_user_documents(user_id):
+    # Permanently delete all of THIS user's stored documents.
+    delete_documents(collection_name=_collection_for(user_id))
