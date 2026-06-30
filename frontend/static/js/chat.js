@@ -77,6 +77,53 @@ function clearEmptyState() {
   if (empty) empty.remove();
 }
 
+// Minimal, SAFE Markdown renderer (escapes HTML first, then applies a few rules).
+function escapeHtml(s) {
+  return s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+}
+
+function renderInline(s) {
+  s = s.replace(/`([^`]+)`/g, "<code>$1</code>");
+  s = s.replace(/\*\*([^*]+)\*\*/g, "<strong>$1</strong>");
+  s = s.replace(/\*([^*]+)\*/g, "<em>$1</em>");
+  return s;
+}
+
+function renderMarkdown(md) {
+  const lines = escapeHtml(md).split(/\r?\n/);
+  let html = "";
+  let inList = false;
+  const closeList = () => {
+    if (inList) {
+      html += "</ul>";
+      inList = false;
+    }
+  };
+  for (const raw of lines) {
+    const line = raw.trim();
+    if (/^###?\s+/.test(line)) {
+      closeList();
+      html += "<h3>" + renderInline(line.replace(/^###?\s+/, "")) + "</h3>";
+    } else if (/^#\s+/.test(line)) {
+      closeList();
+      html += "<h2>" + renderInline(line.replace(/^#\s+/, "")) + "</h2>";
+    } else if (/^[-*]\s+/.test(line)) {
+      if (!inList) {
+        html += "<ul>";
+        inList = true;
+      }
+      html += "<li>" + renderInline(line.replace(/^[-*]\s+/, "")) + "</li>";
+    } else if (line === "") {
+      closeList();
+    } else {
+      closeList();
+      html += "<p>" + renderInline(line) + "</p>";
+    }
+  }
+  closeList();
+  return html;
+}
+
 function addMessage(role, text, sources) {
   clearEmptyState();
   const wrap = document.createElement("div");
@@ -84,7 +131,12 @@ function addMessage(role, text, sources) {
 
   const bubble = document.createElement("div");
   bubble.className = "bubble";
-  bubble.textContent = text;
+  // Render the assistant's answer as Markdown; keep user text plain.
+  if (role === "assistant") {
+    bubble.innerHTML = renderMarkdown(text);
+  } else {
+    bubble.textContent = text;
+  }
   wrap.appendChild(bubble);
 
   if (sources && sources.length) {
