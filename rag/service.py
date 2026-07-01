@@ -37,15 +37,35 @@ def process_documents(files, user_id):
     return len(chunks)
 
 
+# Tag the model appends when its reply is not based on the documents
+# (greetings, small talk, or "I don't know"). We use it to hide the sources line.
+_NO_SOURCES_TAG = "<no_sources>"
+
+
 def answer_question(question, user_id):
-    # Searches only THIS user's documents, then asks the LLM.
     # Returns (answer, sources).
-    query_embedding = embed_query(question)
-    relevant_chunks = search_vectorstore(
-        query_embedding, collection_name=_collection_for(user_id)
-    )
+    #
+    # If the user has uploaded documents, we retrieve the relevant passages and
+    # let the model answer from them (with sources). If they have no documents,
+    # we pass no context and the model answers as a general assistant.
+    if documents_ready(user_id):
+        query_embedding = embed_query(question)
+        relevant_chunks = search_vectorstore(
+            query_embedding, collection_name=_collection_for(user_id)
+        )
+    else:
+        relevant_chunks = []
+
     answer = get_answer(question, relevant_chunks)
-    sources = format_sources(relevant_chunks)
+
+    # If the model marked the reply as not document-based, drop the tag and
+    # return no sources; otherwise show the sources it was based on.
+    if _NO_SOURCES_TAG in answer:
+        answer = answer.replace(_NO_SOURCES_TAG, "").strip()
+        sources = []
+    else:
+        sources = format_sources(relevant_chunks)
+
     return answer, sources
 
 

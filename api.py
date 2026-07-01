@@ -242,9 +242,8 @@ def ask(request: AskRequest, current_user: User = Depends(get_current_user)):
     if not question:
         raise HTTPException(status_code=400, detail="The question must not be empty.")
 
-    if not service.documents_ready(current_user.id):
-        raise HTTPException(status_code=400, detail="No documents have been processed yet.")
-
+    # No upload required: if the user has documents we answer from them, otherwise
+    # we answer as a general assistant (handled inside the service).
     try:
         answer, sources = service.answer_question(question, current_user.id)
     except GeminiError as exc:

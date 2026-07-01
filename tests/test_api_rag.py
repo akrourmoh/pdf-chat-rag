@@ -20,10 +20,15 @@ def test_process_then_ask(client, auth_headers, make_pdf):
     assert isinstance(data["sources"], list) and len(data["sources"]) >= 1
 
 
-def test_ask_before_processing_is_rejected(client, auth_headers):
+def test_ask_without_documents_answers_generally(client, auth_headers):
+    # With no uploaded documents, the app still answers (general assistant mode)
+    # and returns no sources.
     headers = auth_headers("empty@test.com")
-    r = client.post("/ask", json={"question": "anything?"}, headers=headers)
-    assert r.status_code == 400
+    r = client.post("/ask", json={"question": "What is the capital of France?"}, headers=headers)
+    assert r.status_code == 200
+    data = r.json()
+    assert data["answer"]
+    assert data["sources"] == []
 
 
 def test_user_documents_are_isolated(client, auth_headers, make_pdf):
@@ -40,10 +45,12 @@ def test_user_documents_are_isolated(client, auth_headers, make_pdf):
     # User A can query their own documents.
     assert client.get("/status", headers=user_a).json()["documents_ready"] is True
 
-    # User B has uploaded nothing -> sees no documents and cannot ask.
+    # User B has uploaded nothing -> no documents, and cannot see User A's data.
     assert client.get("/status", headers=user_b).json()["documents_ready"] is False
     r = client.post("/ask", json={"question": "What is the secret?"}, headers=user_b)
-    assert r.status_code == 400
+    assert r.status_code == 200
+    # No sources means User B did not retrieve any of User A's documents.
+    assert r.json()["sources"] == []
 
 
 def test_delete_my_documents(client, auth_headers, make_pdf):
