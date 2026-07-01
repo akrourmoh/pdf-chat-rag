@@ -34,7 +34,7 @@ CHUNK_SIZE = int(os.getenv("CHUNK_SIZE", "1000"))       # max characters per chu
 CHUNK_OVERLAP = int(os.getenv("CHUNK_OVERLAP", "200"))  # characters shared between chunks
 
 # ── Retrieval ──────────────────────────────────────────────────────────────────
-TOP_K = int(os.getenv("TOP_K", "4"))  # how many chunks to retrieve per question
+TOP_K = int(os.getenv("TOP_K", "6"))  # how many chunks to retrieve per question
 
 # ── Performance ──────────────────────────────────────────────────────────────
 # How many embedding requests to send in parallel (network-bound, so threads help).
